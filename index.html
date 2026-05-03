@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PG Management</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    input, button { margin: 5px; padding: 6px; }
+    table { border-collapse: collapse; margin-top: 10px; }
+    td, th { border: 1px solid #ccc; padding: 8px; }
+  </style>
+</head>
+<body>
+
+<h1>PG Management System</h1>
+
+<!-- Add Tenant -->
+<h2>Add Tenant</h2>
+<input id="name" placeholder="Name">
+<input id="phone" placeholder="Phone">
+<input id="room" placeholder="Room ID">
+<button onclick="addTenant()">Add Tenant</button>
+
+<!-- Tenant Table -->
+<h2>Tenant List</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Phone</th>
+      <th>Room</th>
+    </tr>
+  </thead>
+  <tbody id="tenantTable"></tbody>
+</table>
+
+<!-- Available Rooms -->
+<h2>Available Rooms</h2>
+<button onclick="loadRooms()">Check Rooms</button>
+<ul id="rooms"></ul>
+
+<script>
+const API = "http://localhost:3000";
+
+// Load tenants
+async function loadTenants() {
+  const res = await fetch(`${API}/tenants`);
+  const data = await res.json();
+
+  const table = document.getElementById("tenantTable");
+  table.innerHTML = "";
+
+  data.forEach(t => {
+    table.innerHTML += `
+      <tr>
+        <td>${t.Name}</td>
+        <td>${t.Phone}</td>
+        <td>${t.ROOM_ID}</td>
+      </tr>
+    `;
+  });
+}
+
+// Add tenant
+async function addTenant() {
+  const name = document.getElementById("name").value;
+  const phone = document.getElementById("phone").value;
+  const room = document.getElementById("room").value;
+
+  await fetch(`${API}/tenant`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ name, phone, room })
+  });
+
+  loadTenants();
+}
+
+// Load available rooms
+async function loadRooms() {
+  const res = await fetch(`${API}/rooms/available`);
+  const data = await res.json();
+
+  const list = document.getElementById("rooms");
+  list.innerHTML = "";
+
+  data.forEach(r => {
+    list.innerHTML += `<li>Room ${r.Room_Number} (Capacity: ${r.Capacity})</li>`;
+  });
+}
+
+loadTenants();
+</script>
+
+</body>
+</html>
